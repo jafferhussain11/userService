@@ -3,6 +3,7 @@ package dev.jaffer.userservice.controllers;
 import dev.jaffer.userservice.dtos.LoginRequestDto;
 import dev.jaffer.userservice.dtos.UserDto;
 import dev.jaffer.userservice.dtos.ValidateTokenRequestDto;
+import dev.jaffer.userservice.dtos.ValidateTokenResponseDto;
 import dev.jaffer.userservice.exceptions.PasswordNotMatchedException;
 import dev.jaffer.userservice.exceptions.UserAlreadyExists;
 import dev.jaffer.userservice.exceptions.UserDoesNotExist;
@@ -11,6 +12,7 @@ import dev.jaffer.userservice.models.SessionStatus;
 import dev.jaffer.userservice.models.User;
 import dev.jaffer.userservice.services.AuthService;
 import io.jsonwebtoken.Jwts;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 public class AuthController {
@@ -47,10 +50,22 @@ public class AuthController {
     }
 
     @PostMapping("/validateSession")
-    public ResponseEntity<SessionStatus> validateSession(@RequestBody ValidateTokenRequestDto validateTokenRequestDto) {
+    public ResponseEntity<ValidateTokenResponseDto> validateSession(@RequestBody ValidateTokenRequestDto validateTokenRequestDto) {
         String token = validateTokenRequestDto.getToken();
-        SessionStatus sessionStatus = authService.validateSession(token);
-        return ResponseEntity.ok(sessionStatus);
+        Long userId = validateTokenRequestDto.getUserId();
+
+        Optional<UserDto> userDto = authService.validate(token, userId);
+
+        if(userDto.isEmpty()) {
+            ValidateTokenResponseDto response = new ValidateTokenResponseDto();
+            response.setStatus(SessionStatus.INVALID);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        ValidateTokenResponseDto response = new ValidateTokenResponseDto();
+        response.setStatus(SessionStatus.ACTIVE);
+        response.setUser(userDto.get());
+        return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
 }

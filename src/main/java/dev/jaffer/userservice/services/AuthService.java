@@ -103,18 +103,23 @@ public class AuthService {
         return responseEntity;
     }
 
-    public SessionStatus validateSession(String token) {
+    public Optional<UserDto> validate(String token,Long userId) {
 
         Optional<Session> sessionOptional = Optional.ofNullable(sessionRepository.findByToken(token));
 
         if (sessionOptional.isEmpty()) {
-            return SessionStatus.INVALID;
+            return Optional.empty();
         }
+
         Session session = sessionOptional.get();
-        if (session.getStatus() == SessionStatus.LOGGED_OUT) {
-            return SessionStatus.LOGGED_OUT;
+
+        if (session.getStatus() != SessionStatus.ACTIVE) {
+            return Optional.empty();
         }
-        return SessionStatus.ACTIVE;
+
+        User user = userRepository.findById(userId).get();
+        return Optional.of(UserDto.from(user));
+
     }
 
     public void logout(String token) {
