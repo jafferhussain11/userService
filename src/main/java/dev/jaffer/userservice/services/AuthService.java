@@ -1,7 +1,7 @@
 package dev.jaffer.userservice.services;
 
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
+
 import dev.jaffer.userservice.dtos.LoginRequestDto;
 import dev.jaffer.userservice.dtos.UserDto;
 import dev.jaffer.userservice.exceptions.PasswordNotMatchedException;
@@ -13,9 +13,9 @@ import dev.jaffer.userservice.models.User;
 import dev.jaffer.userservice.repositories.SessionRepository;
 import dev.jaffer.userservice.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMapAdapter;
@@ -39,7 +39,7 @@ public class AuthService {
 
     public User signUp(String email, String password) throws UserAlreadyExists {
 
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
             throw new UserAlreadyExists("User already exists");
@@ -55,7 +55,7 @@ public class AuthService {
     }
     public ResponseEntity<UserDto> login(String email, String password) throws UserDoesNotExist, PasswordNotMatchedException {
 
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
             throw new UserDoesNotExist("User does not exist");
@@ -103,6 +103,7 @@ public class AuthService {
 
         return responseEntity;
     }
+
 
     public Optional<UserDto> validate(String token,Long userId) {
 
