@@ -41,6 +41,7 @@ public class AuthController {
         return ResponseEntity.ok(UserDto.from(user));
     }
 
+    // NOT USED ,SPring security is used for authentication
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) throws UserDoesNotExist, PasswordNotMatchedException {
 

@@ -86,6 +86,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/registerClient").permitAll()
                         .requestMatchers("/signup").permitAll()
+                        .requestMatchers("/roles/createRole").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors().disable()

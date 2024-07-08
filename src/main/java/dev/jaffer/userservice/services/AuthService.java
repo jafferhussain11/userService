@@ -7,9 +7,11 @@ import dev.jaffer.userservice.dtos.UserDto;
 import dev.jaffer.userservice.exceptions.PasswordNotMatchedException;
 import dev.jaffer.userservice.exceptions.UserAlreadyExists;
 import dev.jaffer.userservice.exceptions.UserDoesNotExist;
+import dev.jaffer.userservice.models.Role;
 import dev.jaffer.userservice.models.Session;
 import dev.jaffer.userservice.models.SessionStatus;
 import dev.jaffer.userservice.models.User;
+import dev.jaffer.userservice.repositories.RoleRepository;
 import dev.jaffer.userservice.repositories.SessionRepository;
 import dev.jaffer.userservice.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
@@ -20,9 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMapAdapter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AuthService {
@@ -30,11 +30,14 @@ public class AuthService {
     private UserRepository userRepository;
     private PasswordEncoder bCryptPasswordEncoder ;
     private SessionRepository sessionRepository;
+    private RoleRepository roleRepository;
 
-    public AuthService(UserRepository userRepository, SessionRepository sessionRepository, PasswordEncoder bCryptPasswordEncoder) {
+    public AuthService(UserRepository userRepository, SessionRepository sessionRepository, PasswordEncoder bCryptPasswordEncoder,
+                       RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.sessionRepository = sessionRepository;
+        this.roleRepository = roleRepository;
     }
 
     public User signUp(String email, String password) throws UserAlreadyExists {
@@ -48,11 +51,16 @@ public class AuthService {
         user.setEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(password));
 
+        Set<Role> roles = user.getRoles();
+        roles.add(roleRepository.findByName("USER").get());
+        user.setRoles(roles);
+
         User savedUser = userRepository.save(user);
 
         return savedUser;
 
     }
+    //NOT USED ,SPring security is used for authentication
     public ResponseEntity<UserDto> login(String email, String password) throws UserDoesNotExist, PasswordNotMatchedException {
 
         Optional<User> userOptional = userRepository.findByEmail(email);
