@@ -1,9 +1,6 @@
 package dev.jaffer.userservice.controllers;
 
-import dev.jaffer.userservice.dtos.LoginRequestDto;
-import dev.jaffer.userservice.dtos.UserDto;
-import dev.jaffer.userservice.dtos.ValidateTokenRequestDto;
-import dev.jaffer.userservice.dtos.ValidateTokenResponseDto;
+import dev.jaffer.userservice.dtos.*;
 import dev.jaffer.userservice.exceptions.PasswordNotMatchedException;
 import dev.jaffer.userservice.exceptions.UserAlreadyExists;
 import dev.jaffer.userservice.exceptions.UserDoesNotExist;
@@ -33,10 +30,10 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signup(@RequestBody LoginRequestDto loginRequest) throws UserAlreadyExists {
+    public ResponseEntity<UserDto> signup(@RequestBody SignupRequestDto signupRequestDto) throws UserAlreadyExists {
 
-        String email = loginRequest.getEmail();
-        String password = loginRequest.getPassword();
+        String email = signupRequestDto.getEmail();
+        String password = signupRequestDto.getPassword();
         User user = authService.signUp(email, password);
         return ResponseEntity.ok(UserDto.from(user));
     }
